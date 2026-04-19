@@ -36,13 +36,12 @@ if (config.isProduction) {
   const clientDist = path.join(__dirname, '..', 'client', 'dist');
   app.use(express.static(clientDist));
   
-  // Use a named 'splat' parameter. 
-  // This is the most compatible way across modern path-to-regexp versions.
-  app.get('/:path*', (req, res) => {
+  // This is the v8+ way to do a catch-all route:
+  // It captures everything into a parameter named '0'
+  app.get('/:any*', (req, res) => {
     res.sendFile(path.join(clientDist, 'index.html'));
   });
 }
-
 // ---------- Error Handler ----------
 app.use(errorHandler);
 
