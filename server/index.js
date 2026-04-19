@@ -35,7 +35,9 @@ app.use('/api/monitors', resultsRouter);
 if (config.isProduction) {
   const clientDist = path.join(__dirname, '..', 'client', 'dist');
   app.use(express.static(clientDist));
-  app.get('*', (req, res) => {
+  
+  // Change '*' to '(.*)' to satisfy the new path-to-regexp requirements
+  app.get('(.*)', (req, res) => {
     res.sendFile(path.join(clientDist, 'index.html'));
   });
 }
