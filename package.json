@@ -1,0 +1,30 @@
+{
+  "name": "lively",
+  "version": "1.0.0",
+  "description": "Latency Monitor & Health Dashboard — ping URLs, track response times, visualize uptime",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "server:dev": "node --watch server/index.js",
+    "client:dev": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "start": "NODE_ENV=production node server/index.js",
+    "seed": "node server/seed.js"
+  },
+  "keywords": [
+    "monitoring",
+    "uptime",
+    "latency",
+    "dashboard"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "concurrently": "^9.2.1",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.3.2",
+    "mongoose": "^9.4.1",
+    "node-cron": "^4.2.1"
+  }
+}
