@@ -4,6 +4,9 @@
   "description": "Latency Monitor & Health Dashboard — ping URLs, track response times, visualize uptime",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
     "server:dev": "node --watch server/index.js",
