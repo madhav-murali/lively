@@ -38,7 +38,7 @@ if (config.isProduction) {
   
   // This is the v8+ way to do a catch-all route:
   // It captures everything into a parameter named '0'
-  app.get('/(.*)*', (req, res) => {
+  app.get('*', (req, res) => {
     res.sendFile(path.join(clientDist, 'index.html'));
   });
 }
