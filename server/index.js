@@ -36,8 +36,9 @@ if (config.isProduction) {
   const clientDist = path.join(__dirname, '..', 'client', 'dist');
   app.use(express.static(clientDist));
   
-  // Change '*' to '(.*)' to satisfy the new path-to-regexp requirements
-  app.get('(.*)', (req, res) => {
+  // Use a named 'splat' parameter. 
+  // This is the most compatible way across modern path-to-regexp versions.
+  app.get('/:path*', (req, res) => {
     res.sendFile(path.join(clientDist, 'index.html'));
   });
 }
