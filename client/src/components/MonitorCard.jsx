@@ -19,6 +19,7 @@ export default function MonitorCard({
   onPause,
   onDelete,
   onPingNow,
+  onEdit,
 }) {
   const status = monitor.lastStatus || 'pending';
   const rtColor = getResponseTimeColor(monitor.lastResponseTime);
@@ -87,6 +88,13 @@ export default function MonitorCard({
             title="Ping Now"
           >
             ⚡ Ping
+          </button>
+          <button
+            className="btn btn-sm"
+            onClick={() => onEdit(monitor)}
+            title="Edit"
+          >
+            ✏️ Edit
           </button>
           <button
             className="btn btn-sm"

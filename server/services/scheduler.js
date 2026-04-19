@@ -14,10 +14,12 @@ function createTask(monitor) {
 
   if (intervalSec < 60) {
     // node-cron minimum is 1 minute, so use setInterval for sub-minute
-    const intervalId = setInterval(() => {
-      pingMonitor(monitor).catch(err =>
-        console.error(`[Scheduler] Error pinging ${monitor.name}:`, err.message)
-      );
+    const intervalId = setInterval(async () => {
+      try {
+        await pingMonitor(monitor);
+      } catch (err) {
+        console.error(`[Scheduler] Error pinging ${monitor.name}:`, err.message);
+      }
     }, intervalSec * 1000);
 
     return {
@@ -30,10 +32,12 @@ function createTask(monitor) {
   const intervalMin = Math.max(1, Math.round(intervalSec / 60));
   const cronExpr = `*/${intervalMin} * * * *`;
 
-  const task = cron.schedule(cronExpr, () => {
-    pingMonitor(monitor).catch(err =>
-      console.error(`[Scheduler] Error pinging ${monitor.name}:`, err.message)
-    );
+  const task = cron.schedule(cronExpr, async () => {
+    try {
+      await pingMonitor(monitor);
+    } catch (err) {
+      console.error(`[Scheduler] Error pinging ${monitor.name}:`, err.message);
+    }
   });
 
   return { stop: () => task.stop(), type: 'cron', expr: cronExpr };

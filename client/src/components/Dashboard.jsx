@@ -2,11 +2,17 @@ import { useState, useEffect, useCallback } from 'react';
 import { api } from '../utils/api';
 import MonitorCard from './MonitorCard';
 import AddMonitorModal from './AddMonitorModal';
+import ConfirmModal from './ConfirmModal';
 
 export default function Dashboard({ onSelectMonitor }) {
   const [monitors, setMonitors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [monitorToEdit, setMonitorToEdit] = useState(null);
+  
+  const [monitorToDelete, setMonitorToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  
   const [toasts, setToasts] = useState([]);
 
   const addToast = (message, type = 'success') => {
@@ -34,9 +40,14 @@ export default function Dashboard({ onSelectMonitor }) {
     return () => clearInterval(interval);
   }, [fetchMonitors]);
 
-  const handleAddMonitor = async (formData) => {
-    await api.createMonitor(formData);
-    addToast(`Added "${formData.name}" to monitoring`);
+  const handleSaveMonitor = async (formData, editId) => {
+    if (editId) {
+      await api.updateMonitor(editId, formData);
+      addToast(`Updated "${formData.name}"`);
+    } else {
+      await api.createMonitor(formData);
+      addToast(`Added "${formData.name}" to monitoring`);
+    }
     fetchMonitors();
   };
 
@@ -60,14 +71,18 @@ export default function Dashboard({ onSelectMonitor }) {
     }
   };
 
-  const handleDelete = async (id, name) => {
-    if (!confirm(`Delete monitor "${name}"? This cannot be undone.`)) return;
+  const confirmDelete = async () => {
+    if (!monitorToDelete) return;
+    setIsDeleting(true);
     try {
-      await api.deleteMonitor(id);
-      addToast(`Deleted "${name}"`);
+      await api.deleteMonitor(monitorToDelete._id);
+      addToast(`Deleted "${monitorToDelete.name}"`);
       fetchMonitors();
     } catch (err) {
       addToast(err.message, 'error');
+    } finally {
+      setIsDeleting(false);
+      setMonitorToDelete(null);
     }
   };
 
@@ -115,7 +130,10 @@ export default function Dashboard({ onSelectMonitor }) {
           <span className="dashboard-title">Monitors</span>
           <button
             className="btn btn-primary"
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              setMonitorToEdit(null);
+              setShowModal(true);
+            }}
             id="add-monitor-dashboard-btn"
           >
             ＋ Add Monitor
@@ -139,7 +157,10 @@ export default function Dashboard({ onSelectMonitor }) {
             <p>Add your first URL to start monitoring its uptime and response time.</p>
             <button
               className="btn btn-primary"
-              onClick={() => setShowModal(true)}
+              onClick={() => {
+                setMonitorToEdit(null);
+                setShowModal(true);
+              }}
             >
               ＋ Add Your First Monitor
             </button>
@@ -153,18 +174,35 @@ export default function Dashboard({ onSelectMonitor }) {
                 onClick={onSelectMonitor}
                 onPingNow={handlePingNow}
                 onPause={handlePause}
-                onDelete={handleDelete}
+                onEdit={(mon) => {
+                  setMonitorToEdit(mon);
+                  setShowModal(true);
+                }}
+                onDelete={(_id, name) => setMonitorToDelete({ _id, name })}
               />
             ))}
           </div>
         )}
       </div>
 
-      {/* Add Monitor Modal */}
+      {/* Add/Edit Monitor Modal */}
       {showModal && (
         <AddMonitorModal
+          initialData={monitorToEdit}
           onClose={() => setShowModal(false)}
-          onSubmit={handleAddMonitor}
+          onSubmit={handleSaveMonitor}
+        />
+      )}
+
+      {/* Confirm Delete Modal */}
+      {monitorToDelete && (
+        <ConfirmModal
+          title="Delete Monitor"
+          message={`Are you sure you want to delete "${monitorToDelete.name}"? This action cannot be undone.`}
+          confirmText={isDeleting ? 'Deleting...' : 'Delete'}
+          disabled={isDeleting}
+          onConfirm={confirmDelete}
+          onCancel={() => setMonitorToDelete(null)}
         />
       )}
 

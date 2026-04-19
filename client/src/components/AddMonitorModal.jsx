@@ -1,11 +1,11 @@
 import { useState } from 'react';
 
-export default function AddMonitorModal({ onClose, onSubmit }) {
+export default function AddMonitorModal({ onClose, onSubmit, initialData }) {
   const [form, setForm] = useState({
-    name: '',
-    url: '',
-    interval: 60,
-    expectedStatusCode: 200,
+    name: initialData?.name || '',
+    url: initialData?.url || '',
+    interval: initialData?.interval || 60,
+    expectedStatusCode: initialData?.expectedStatusCode || 200,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -36,11 +36,10 @@ export default function AddMonitorModal({ onClose, onSubmit }) {
         throw new Error('Please enter a valid URL (e.g., https://example.com)');
       }
 
-      await onSubmit(form);
+      await onSubmit(form, initialData?._id);
       onClose();
     } catch (err) {
       setError(err.message);
-    } finally {
       setLoading(false);
     }
   };
@@ -48,7 +47,7 @@ export default function AddMonitorModal({ onClose, onSubmit }) {
   return (
     <div className="modal-backdrop" onClick={onClose} id="add-monitor-modal">
       <div className="modal" onClick={e => e.stopPropagation()}>
-        <h2>Add New Monitor</h2>
+        <h2>{initialData ? 'Edit Monitor' : 'Add New Monitor'}</h2>
 
         {error && (
           <div style={{
@@ -134,7 +133,7 @@ export default function AddMonitorModal({ onClose, onSubmit }) {
               disabled={loading}
               id="submit-monitor-btn"
             >
-              {loading ? 'Adding...' : 'Add Monitor'}
+              {loading ? 'Saving...' : (initialData ? 'Save Changes' : 'Add Monitor')}
             </button>
           </div>
         </form>
